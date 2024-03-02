@@ -1,0 +1,11 @@
+uint32 ->VertexCount
+uint8  ->bodyCount
+
+for each body name:
+	40 bytes
+for each vertex of every body:
+	24 bytes
+for each body:
+	uint32 ->indicesCount
+	for each indice:
+		uint32 for what vertex in vertex list
