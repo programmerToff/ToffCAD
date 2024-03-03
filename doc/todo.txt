@@ -1,2 +1,0 @@
-fix generateSTL function
-finish openTCAD function
