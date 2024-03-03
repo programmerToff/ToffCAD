@@ -41,5 +41,31 @@ public:
 	void saveTCAD();
 	void openTCAD();
 	void generateSTL(int BodyIndex);
+
+	inline void printInfo()
+	{
+		int i = 0;
+		for (int j = 0; j < BodyList.second.size(); j++)
+		{
+			std::cout << BodyList.second[j] << ":\n";
+			std::cout << "\nVertices:\n";
+			for (auto& itr : BodyList.first[j].verts)
+			{
+				std::cout << itr << " ";
+				if (i < 5) { i++; }
+				else { i = 0; std::cout << '\n'; }
+			}
+			std::cout << "\nIndices:\n";
+			i = 0;
+			for (auto& itr : BodyList.first[j].inds)
+			{
+				std::cout << itr << " ";
+				if (i < 2) { i++; }
+				else { i = 0; std::cout << '\n'; }
+			}
+		}
+	}
 };
 
+std::string saveFileDialog();
+std::string openExplorerDialog();
