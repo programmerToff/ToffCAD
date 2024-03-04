@@ -150,7 +150,8 @@ void bodies::saveTCAD()
 
 	for (Body& body : BodyList.first)
 	{
-		file.write(reinterpret_cast<char*>(&BodyList.second[i]), 40);
+		BodyList.second[i].resize(40, '\0');
+		file.write(BodyList.second[i].c_str(), 40);
 		vertexCount = body.verts.size() / 6;
 		indicesCount = body.inds.size() / 3;
 		file.write(reinterpret_cast<char*>(&vertexCount), 4);
@@ -173,49 +174,49 @@ void bodies::openTCAD()
 {
 	BodyList.first.clear();
 	BodyList.second.clear();
-	std::ifstream file(openExplorerDialog().c_str(), std::ios::binary);
+
+	std::string filepath = openExplorerDialog();
+	Body nullBody(0);
+	float vertex;
+	GLuint indice;
+
+	std::ifstream file(filepath, std::ios::binary);
+	if (!file.is_open()) {
+		std::cerr << "Error opening file: " << filepath << std::endl;
+		return;
+	}
 
 	uint16_t bodyCount;
-	file.read(reinterpret_cast<char*>(&bodyCount), 2);
-	for (int i = 0; i < bodyCount; i++)
-	{ 
-		BodyList.second.push_back(""); 
-		BodyList.first.push_back(NULL); 
-	}
+	file.read(reinterpret_cast<char*>(&bodyCount), sizeof(uint16_t));
 
-	uint32_t vertexCount;
-	uint32_t indiceCount;
-	Body body(0);
-
-
-	for (short i = 0; i < bodyCount; i++)
+	for (short currentBodyId = 0; currentBodyId < bodyCount; ++currentBodyId)
 	{
-		file.read(reinterpret_cast<char*>(&BodyList.second[i]), 40);
+		char name[41];
+		file.read(name, 40);
+		name[40] = '\0';
+		std::string bodyName(name);
 
-		file.read(reinterpret_cast<char*>(&vertexCount), 4);
-		for (int j = 0; j < vertexCount * 6; j++)
+		BodyList.first.push_back(nullBody);
+		BodyList.second.push_back(bodyName);
+
+		uint32_t vertexCount;
+		file.read(reinterpret_cast<char*>(&vertexCount), sizeof(uint32_t));
+
+		for (uint32_t i = 0; i < vertexCount*6; ++i)
 		{
-			body.verts.push_back(0.0f);
+			file.read(reinterpret_cast<char*>(&vertex), 4);
+			BodyList.first[currentBodyId].verts.push_back(vertex);
 		}
 
-		for (uint32_t j = 0; j < vertexCount * 6; j++)
-		{
-			file.read(reinterpret_cast<char*>(&body.verts[j]), 4);
-		}
+		uint32_t indiceCount;
+		file.read(reinterpret_cast<char*>(&indiceCount), sizeof(uint32_t));
 
-		file.read(reinterpret_cast<char*>(&indiceCount), 4);
-		for (int j = 0; j < indiceCount * 3; j++)
+		for (uint32_t i = 0; i < indiceCount*3; ++i)
 		{
-			body.inds.push_back(0);
+			file.read(reinterpret_cast<char*>(&indice), sizeof(GLuint));
+			BodyList.first[currentBodyId].inds.push_back(indice);
 		}
-
-		for (uint32_t j = 0; j < indiceCount * 3; j++)
-		{
-			file.read(reinterpret_cast<char*>(&body.inds[j]), 4);
-		}
-		BodyList.first[i] = 0;
-		body.inds.clear();
-		body.verts.clear();
 	}
+
 	file.close();
 }
