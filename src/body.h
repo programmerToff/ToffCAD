@@ -41,7 +41,7 @@ public:
 
 	void saveTCAD();
 	void openTCAD();
-	void generateSTL(int BodyIndex);
+	void generateSTL(int bodyIndex);
 
 	inline void printInfo()
 	{

@@ -110,31 +110,47 @@ void bodies::addCube()
 	addVertex(Cube.verts, 0.0f, 1.0f, 1.0f);
 	addVertex(Cube.verts, 0.0f, 1.0f, 0.0f);
 	addTriangle(Cube.inds, 0, 1, 3);
-	addTriangle(Cube.inds, 0, 1, 2);
-	addTriangle(Cube.inds, 4, 5, 6);
+	addTriangle(Cube.inds, 0, 2, 3);
 	addTriangle(Cube.inds, 4, 5, 7);
+	addTriangle(Cube.inds, 4, 6, 7);
 	addTriangle(Cube.inds, 1, 3, 7);
-	addTriangle(Cube.inds, 1, 3, 5);
-	addTriangle(Cube.inds, 0, 2, 4);
+	addTriangle(Cube.inds, 1, 5, 7);
 	addTriangle(Cube.inds, 0, 2, 6);
-	addTriangle(Cube.inds, 0, 1, 4);
-	addTriangle(Cube.inds, 0, 1, 5);
+	addTriangle(Cube.inds, 0, 4, 6);
+	addTriangle(Cube.inds, 3, 6, 7);
 	addTriangle(Cube.inds, 2, 3, 6);
-	addTriangle(Cube.inds, 2, 3, 7);
+	addTriangle(Cube.inds, 0, 1, 5);
+	addTriangle(Cube.inds, 0, 4, 5);
 	BodyList.first.push_back(Cube);
 	BodyList.second.push_back("Cube");
 }
 
 void bodies::addPyramid()
 {
+	Body pyramid(0);
+	addVertex(pyramid.verts, 0, 0, 0);
+	addVertex(pyramid.verts, 1, 1, 0);
+	addVertex(pyramid.verts, 0, 1, 0);
+	addVertex(pyramid.verts, 1, 0, 0);
+	addVertex(pyramid.verts, 0.5, 0.5, 1);
+	addTriangle(pyramid.inds, 0, 1, 2);
+	addTriangle(pyramid.inds, 0, 1, 3);
+	addTriangle(pyramid.inds, 0, 2, 4);
+	addTriangle(pyramid.inds, 0, 3, 4);
+	addTriangle(pyramid.inds, 1, 2, 4);
+	addTriangle(pyramid.inds, 1, 3, 4);
+	BodyList.first.push_back(pyramid);
+	BodyList.second.push_back("Pyramid");
 }
 
 void bodies::addSphere()
 {
-}
+	Body body(0);
+	
 
-void bodies::generateSTL(int BodyIndex)
-{
+
+	BodyList.first.push_back(body);
+	BodyList.second.push_back("Sphere");
 }
 
 void bodies::saveTCAD()
@@ -218,5 +234,46 @@ void bodies::openTCAD()
 		}
 	}
 
+	file.close();
+}
+
+void bodies::generateSTL(int bodyIndex)
+{
+	const char* header = "ToffCAD generated this STL-script. https://github.com/programmerToff/ToffCAD   ";
+	uint16_t attribByteCount = 0;
+	uint32_t triangleCount = BodyList.first[bodyIndex].inds.size() / 3;
+
+	std::ofstream file(saveFileDialog(), std::ios::binary);
+
+	file.write(header, 80);
+	file.write(reinterpret_cast<char*>(&triangleCount), 4);
+
+	float normal[3];
+	float p1[3];
+	float p2[3];
+	float p3[3];
+
+	for (int i = 0; i < triangleCount; i++)
+	{
+		p1[0] = BodyList.first[bodyIndex].verts[BodyList.first[bodyIndex].inds[i * 3 + 0] * 6 + 0];
+		p1[1] = BodyList.first[bodyIndex].verts[BodyList.first[bodyIndex].inds[i * 3 + 0] * 6 + 1];
+		p1[2] = BodyList.first[bodyIndex].verts[BodyList.first[bodyIndex].inds[i * 3 + 0] * 6 + 2];
+
+		p2[0] = BodyList.first[bodyIndex].verts[BodyList.first[bodyIndex].inds[i * 3 + 1] * 6 + 0];
+		p2[1] = BodyList.first[bodyIndex].verts[BodyList.first[bodyIndex].inds[i * 3 + 1] * 6 + 1];
+		p2[2] = BodyList.first[bodyIndex].verts[BodyList.first[bodyIndex].inds[i * 3 + 1] * 6 + 2];
+
+		p3[0] = BodyList.first[bodyIndex].verts[BodyList.first[bodyIndex].inds[i * 3 + 2] * 6 + 0];
+		p3[1] = BodyList.first[bodyIndex].verts[BodyList.first[bodyIndex].inds[i * 3 + 2] * 6 + 1];
+		p3[2] = BodyList.first[bodyIndex].verts[BodyList.first[bodyIndex].inds[i * 3 + 2] * 6 + 2];
+
+		getNormal(normal, p1, p2, p3);
+
+		file.write(reinterpret_cast<char*>(&normal), 12);
+		file.write(reinterpret_cast<char*>(&p1), 12);
+		file.write(reinterpret_cast<char*>(&p2), 12);
+		file.write(reinterpret_cast<char*>(&p3), 12);
+		file.write(reinterpret_cast<char*>(&attribByteCount), 2);
+	}
 	file.close();
 }
