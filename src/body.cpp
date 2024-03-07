@@ -277,3 +277,60 @@ void bodies::generateSTL(int bodyIndex)
 	}
 	file.close();
 }
+
+void bodies::readSTL()
+{
+	std::ifstream file(openExplorerDialog(), std::ios::binary);
+	Body body(0);
+	float coord;
+
+	file.seekg(80, std::ios::beg);
+
+	uint32_t triangleCount;
+	file.read(reinterpret_cast<char*>(&triangleCount), 4);
+
+	for (int i = 0; i < triangleCount; i++)
+	{
+		file.seekg(12, std::ios::cur);
+		file.read(reinterpret_cast<char*>(&coord), 4);
+		body.verts.push_back(coord);
+		file.read(reinterpret_cast<char*>(&coord), 4);
+		body.verts.push_back(coord);
+		file.read(reinterpret_cast<char*>(&coord), 4);
+		body.verts.push_back(coord);
+		body.verts.push_back(0.0f);
+		body.verts.push_back(0.4f);
+		body.verts.push_back(0.0f);
+		file.read(reinterpret_cast<char*>(&coord), 4);
+		body.verts.push_back(coord);
+		file.read(reinterpret_cast<char*>(&coord), 4);
+		body.verts.push_back(coord);
+		file.read(reinterpret_cast<char*>(&coord), 4);
+		body.verts.push_back(coord);
+		body.verts.push_back(0.0f);
+		body.verts.push_back(0.4f);
+		body.verts.push_back(0.0f);
+		file.read(reinterpret_cast<char*>(&coord), 4);
+		body.verts.push_back(coord);
+		file.read(reinterpret_cast<char*>(&coord), 4);
+		body.verts.push_back(coord);
+		file.read(reinterpret_cast<char*>(&coord), 4);
+		body.verts.push_back(coord);
+		body.verts.push_back(0.0f);
+		body.verts.push_back(0.4f);
+		body.verts.push_back(0.0f);
+		file.seekg(2, std::ios::cur);
+	}
+	for (int i = 0; i < triangleCount * 3; i++)
+	{
+		body.inds.push_back(i);
+	}
+	BodyList.first.push_back(body);
+	BodyList.second.push_back("ImportedSTL");
+	file.close();
+}
+
+void optimizeBodyData(Body& body)
+{
+	
+}

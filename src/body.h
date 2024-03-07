@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <unordered_map>
 
 const float PI = 3.14159265358979323846f;
 
@@ -42,6 +43,7 @@ public:
 	void saveTCAD();
 	void openTCAD();
 	void generateSTL(int bodyIndex);
+	void readSTL();
 
 	inline void printInfo()
 	{
@@ -70,3 +72,5 @@ public:
 
 std::string saveFileDialog();
 std::string openExplorerDialog();
+
+void optimizeBodyData(Body& body);
