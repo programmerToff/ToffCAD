@@ -51,6 +51,7 @@ public:
 	void addCube();
 	void addPyramid();
 	void addSphere();
+	void test();
 
 	void saveTCAD();
 	void openTCAD();

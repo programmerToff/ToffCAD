@@ -152,6 +152,11 @@ void bodies::addSphere()
 	BodyList.second.push_back("Sphere");
 }
 
+void bodies::test()
+{
+
+}
+
 void bodies::saveTCAD()
 {
 	std::ofstream file(saveFileDialog().c_str(), std::ios::binary);
