@@ -5,5 +5,7 @@
 int main()
 {
 	bodies bodies;
-	bodies.readSTL();
+	bodies.addPyramid();
+	PropertiesTriangle p = bodies.getTriangleProperties(0, 0);
+	bodies.printPropertiesTriangle(p);
 }

@@ -63,7 +63,6 @@ void addTriangle(std::vector<GLuint>& v, GLuint p1, GLuint p2, GLuint p3)
 }
 
 std::string openExplorerDialog() {
-	// Use Windows API to open Explorer dialog
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	IFileOpenDialog* pFileOpen;
 
@@ -78,9 +77,9 @@ std::string openExplorerDialog() {
 				// Get the file path
 				if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath))) {
 					// Convert wide string to narrow string
-					int bufferSize = WideCharToMultiByte(CP_UTF8, 0, pszFilePath, -1, nullptr, 0, nullptr, nullptr);
+					int bufferSize = WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, nullptr, 0, nullptr, nullptr);
 					std::string filePath(bufferSize, '\0');
-					WideCharToMultiByte(CP_UTF8, 0, pszFilePath, -1, &filePath[0], bufferSize, nullptr, nullptr);
+					WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, &filePath[0], bufferSize, nullptr, nullptr);
 
 					CoTaskMemFree(pszFilePath);
 					pItem->Release();
@@ -280,15 +279,16 @@ void bodies::generateSTL(int bodyIndex)
 
 void bodies::readSTL()
 {
-	std::ifstream file(openExplorerDialog(), std::ios::binary);
+	std::string filepath = openExplorerDialog();
+	std::ifstream file(filepath, std::ios::binary);
+
 	Body body(0);
 	float coord;
 
 	file.seekg(80, std::ios::beg);
-
-	uint32_t triangleCount;
+	
+	uint32_t triangleCount = 0;
 	file.read(reinterpret_cast<char*>(&triangleCount), 4);
-
 	for (int i = 0; i < triangleCount; i++)
 	{
 		file.seekg(12, std::ios::cur);
@@ -328,9 +328,4 @@ void bodies::readSTL()
 	BodyList.first.push_back(body);
 	BodyList.second.push_back("ImportedSTL");
 	file.close();
-}
-
-void optimizeBodyData(Body& body)
-{
-	
 }
