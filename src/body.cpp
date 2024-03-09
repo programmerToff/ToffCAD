@@ -45,23 +45,6 @@ void getNormal(float normal[3], float p1[3], float p2[3], float p3[3])
 	return;
 }
 
-void addVertex(std::vector<float>& v, float x, float y, float z)
-{
-	v.push_back(x);
-	v.push_back(y);
-	v.push_back(z);
-	v.push_back(0.0f);
-	v.push_back(0.4f);
-	v.push_back(0.0f);
-}
-
-void addTriangle(std::vector<GLuint>& v, GLuint p1, GLuint p2, GLuint p3)
-{
-	v.push_back(p1);
-	v.push_back(p2);
-	v.push_back(p3);
-}
-
 std::string openExplorerDialog() {
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	IFileOpenDialog* pFileOpen;
@@ -99,62 +82,23 @@ std::string openExplorerDialog() {
 
 void bodies::addCube()
 {
-	Body Cube(0);
-	addVertex(Cube.verts, 1.0f, 0.0f, 1.0f);
-	addVertex(Cube.verts, 1.0f, 0.0f, 0.0f);
-	addVertex(Cube.verts, 0.0f, 0.0f, 1.0f);
-	addVertex(Cube.verts, 0.0f, 0.0f, 0.0f);
-	addVertex(Cube.verts, 1.0f, 1.0f, 1.0f);
-	addVertex(Cube.verts, 1.0f, 1.0f, 0.0f);
-	addVertex(Cube.verts, 0.0f, 1.0f, 1.0f);
-	addVertex(Cube.verts, 0.0f, 1.0f, 0.0f);
-	addTriangle(Cube.inds, 0, 1, 3);
-	addTriangle(Cube.inds, 0, 2, 3);
-	addTriangle(Cube.inds, 4, 5, 7);
-	addTriangle(Cube.inds, 4, 6, 7);
-	addTriangle(Cube.inds, 1, 3, 7);
-	addTriangle(Cube.inds, 1, 5, 7);
-	addTriangle(Cube.inds, 0, 2, 6);
-	addTriangle(Cube.inds, 0, 4, 6);
-	addTriangle(Cube.inds, 3, 6, 7);
-	addTriangle(Cube.inds, 2, 3, 6);
-	addTriangle(Cube.inds, 0, 1, 5);
-	addTriangle(Cube.inds, 0, 4, 5);
-	BodyList.first.push_back(Cube);
+	BodyList.first.push_back(genCube());
 	BodyList.second.push_back("Cube");
 }
-
 void bodies::addPyramid()
 {
-	Body pyramid(0);
-	addVertex(pyramid.verts, 0, 0, 0);
-	addVertex(pyramid.verts, 1, 1, 0);
-	addVertex(pyramid.verts, 0, 1, 0);
-	addVertex(pyramid.verts, 1, 0, 0);
-	addVertex(pyramid.verts, 0.5, 0.5, 1);
-	addTriangle(pyramid.inds, 0, 1, 2);
-	addTriangle(pyramid.inds, 0, 1, 3);
-	addTriangle(pyramid.inds, 0, 2, 4);
-	addTriangle(pyramid.inds, 0, 3, 4);
-	addTriangle(pyramid.inds, 1, 2, 4);
-	addTriangle(pyramid.inds, 1, 3, 4);
-	BodyList.first.push_back(pyramid);
+	BodyList.first.push_back(genPyramid());
 	BodyList.second.push_back("Pyramid");
 }
-
 void bodies::addSphere()
 {
-	Body body(0);
-	
-
-
-	BodyList.first.push_back(body);
+	BodyList.first.push_back(genSphere());
 	BodyList.second.push_back("Sphere");
 }
-
-void bodies::test()
+void bodies::addSSM()
 {
-
+	BodyList.first.push_back(genSSM());
+	BodyList.second.push_back("Vacuum Monster");
 }
 
 void bodies::saveTCAD()
@@ -334,3 +278,55 @@ void bodies::readSTL()
 	BodyList.second.push_back("ImportedSTL");
 	file.close();
 }
+
+
+void bodies::optimizeVertexCount(int index)
+{
+	Body& body = BodyList.first[index];
+	struct Vertex 
+	{
+		float x, y, z, r, g, b;
+	};
+	std::vector<Vertex> uniqueVertices;
+	std::map<Vertex, GLuint,
+		bool(*)(const Vertex&, const Vertex&)> vertexMap(
+			[](const Vertex& lhs, const Vertex& rhs) -> bool {
+				if (lhs.x != rhs.x) return lhs.x < rhs.x;
+				if (lhs.y != rhs.y) return lhs.y < rhs.y;
+				if (lhs.z != rhs.z) return lhs.z < rhs.z;
+				if (lhs.r != rhs.r) return lhs.r < rhs.r;
+				if (lhs.g != rhs.g) return lhs.g < rhs.g;
+				return lhs.b < rhs.b;
+			});
+
+	for (GLuint i = 0; i < body.inds.size(); ++i) {
+		GLuint index = body.inds[i];
+		Vertex vertex{
+			body.verts[index * 6], body.verts[index * 6 + 1], body.verts[index * 6 + 2],
+			body.verts[index * 6 + 3], body.verts[index * 6 + 4], body.verts[index * 6 + 5]
+		};
+
+		auto it = vertexMap.find(vertex);
+		if (it == vertexMap.end()) {
+			GLuint newIndex = static_cast<GLuint>(uniqueVertices.size());
+			vertexMap[vertex] = newIndex;
+			body.inds[i] = newIndex;
+			uniqueVertices.push_back(vertex);
+		}
+		else {
+			body.inds[i] = it->second;
+		}
+	}
+
+	// Copy unique vertices back to the original vector
+	body.verts.clear();
+	for (const auto& vertex : uniqueVertices) {
+		body.verts.push_back(vertex.x);
+		body.verts.push_back(vertex.y);
+		body.verts.push_back(vertex.z);
+		body.verts.push_back(vertex.r);
+		body.verts.push_back(vertex.g);
+		body.verts.push_back(vertex.b);
+	}
+}
+

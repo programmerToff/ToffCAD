@@ -7,25 +7,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include <set>
-
-struct Body
-{
-	std::vector<float> verts;
-	std::vector<GLuint> inds;
-	float* vertices;
-	GLuint* indices;
-
-	inline Body(int null)
-	{
-		verts = { (float)null };
-		inds = { (GLuint)null };
-		vertices = &verts[0];
-		indices = &inds[0];
-		verts.pop_back();
-		inds.pop_back();
-	}
-};
+#include <map>
+#include "add.h"
 
 struct PropertiesBody
 {
@@ -51,7 +34,7 @@ public:
 	void addCube();
 	void addPyramid();
 	void addSphere();
-	void test();
+	void addSSM();
 
 	void saveTCAD();
 	void openTCAD();
@@ -153,7 +136,7 @@ public:
 
 		return out;
 	}
-	
+	void optimizeVertexCount(int index);
 };
 
 std::string saveFileDialog();

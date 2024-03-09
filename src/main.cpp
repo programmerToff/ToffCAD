@@ -5,6 +5,6 @@
 int main()
 {
 	bodies bodies;
-	bodies.test();
-	bodies.generateSTL(0);
+	bodies.addSSM();
+	bodies.printPropertiesBody(bodies.getBodyProperties(0));
 }
