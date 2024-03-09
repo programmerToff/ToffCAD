@@ -279,7 +279,6 @@ void bodies::readSTL()
 	file.close();
 }
 
-
 void bodies::optimizeVertexCount(int index)
 {
 	Body& body = BodyList.first[index];
