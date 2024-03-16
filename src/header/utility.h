@@ -3,7 +3,7 @@
 
 inline void stlToAddBody()
 {
-	bodies bodySTL;
+	bodies bodySTL(0, 0);
 	bodySTL.readSTL();
 	bodySTL.optimizeVertexCount(0);
 	std::ofstream output(saveFileDialog());

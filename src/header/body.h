@@ -1,8 +1,13 @@
 #pragma once
+#pragma warning( disable: 6031 )
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 #include <iostream>
 #include <Windows.h>
+#include <algorithm>
 #include <shlobj.h>
 #include <string>
 #include <fstream>
@@ -107,6 +112,14 @@ class bodies
 {
 public:
 	std::pair<std::vector<Body>, std::vector<std::string>> BodyList;
+	float* vertices;
+	GLuint* indices;
+
+	inline bodies(float i, GLuint g)
+	{
+		vertices = &i;
+		indices = &g;
+	}
 
 	inline void addCube()
 	{
@@ -167,7 +180,7 @@ public:
 		BodyList.second.clear();
 
 		std::string filepath = openExplorerDialog();
-		Body nullBody(0);
+		Body nullBody;
 		float vertex;
 		GLuint indice;
 
@@ -256,7 +269,7 @@ public:
 		std::string filepath = openExplorerDialog();
 		std::ifstream file(filepath, std::ios::binary);
 
-		Body body(0);
+		Body body;
 		float coord;
 
 		file.seekg(80, std::ios::beg);
@@ -399,6 +412,7 @@ public:
 
 		return out;
 	}
+
 	inline void optimizeVertexCount(int index)
 	{
 		Body& body = BodyList.first[index];
@@ -447,5 +461,34 @@ public:
 			body.verts.push_back(vertex.g);
 			body.verts.push_back(vertex.b);
 		}
+	}
+
+	inline void update()
+	{
+		if (BodyList.first.size() == 0) { return; }
+		if (BodyList.first.size() == 1) { vertices = &BodyList.first[0].verts[0]; indices = &BodyList.first[0].inds[0]; return; }
+
+		size_t vertSize = 0;
+		size_t indSize = 0;
+		for (int i = 0; i < BodyList.first.size(); i++)
+		{
+			vertSize += BodyList.first[i].verts.size();
+			indSize += BodyList.first[i].inds.size();
+		}
+
+		vertices = new float[vertSize];
+		indices = new GLuint[indSize];
+
+		size_t offset = 0;
+		for (const auto& Body : BodyList.first) {
+			std::transform(Body.inds.begin(), Body.inds.end(), indices + offset, [offset](GLuint v) { return v + offset; });
+			offset += Body.inds.size();
+		}
+
+		for (const auto& Body : BodyList.first)
+		{
+			std::copy(Body.verts.begin(), Body.verts.end(), vertices);
+		}
+		return;
 	}
 };

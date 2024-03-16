@@ -5,18 +5,6 @@ struct Body
 {
 	std::vector<float> verts;
 	std::vector<GLuint> inds;
-	float* vertices;
-	GLuint* indices;
-
-	inline Body(int null)
-	{
-		verts = { (float)null };
-		inds = { (GLuint)null };
-		vertices = &verts[0];
-		indices = &inds[0];
-		verts.pop_back();
-		inds.pop_back();
-	}
 };
 
 
@@ -38,7 +26,7 @@ inline void addTriangle(std::vector<GLuint>& v, GLuint p1, GLuint p2, GLuint p3)
 
 inline Body genCube()
 {
-	Body Cube(0);
+	Body Cube;
 	addVertex(Cube.verts, 1.0f, 0.0f, 1.0f);
 	addVertex(Cube.verts, 1.0f, 0.0f, 0.0f);
 	addVertex(Cube.verts, 0.0f, 0.0f, 1.0f);
@@ -63,7 +51,7 @@ inline Body genCube()
 }
 inline Body genPyramid()
 {
-	Body pyramid(0);
+	Body pyramid;
 	addVertex(pyramid.verts, 0, 0, 0);
 	addVertex(pyramid.verts, 1, 1, 0);
 	addVertex(pyramid.verts, 0, 1, 0);
@@ -79,12 +67,12 @@ inline Body genPyramid()
 }
 inline Body genSphere()
 {
-	Body sphere(0);
+	Body sphere;
 	return sphere;
 }
 inline Body genSSM()
 {
-	Body body(0);
+	Body body;
 	addVertex(body.verts, -10.1071, -5.56454, 38);
 	addVertex(body.verts, -9.83326, -5.16774, 38);
 	addVertex(body.verts, -10.2781, -6.01536, 38);
