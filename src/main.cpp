@@ -66,6 +66,22 @@ namespace ImGui
 	int winWidth;
 	int downleftWidth;
 	Modes winModes[6];
+	const char* modes[] = {
+		"viewport",
+		"settings",
+		"add",
+		"menu",
+		"properties",
+		"history",
+		"elements",
+		"options"
+	};
+	int selectedModeUp;
+	int selectedModeMiddle;
+	int selectedModeDownRight;
+	int selectedModeLeft;
+	int selectedModeRight;
+	int selectedModeDownLeft;
 	void init(GLFWwindow* window)
 	{
 		glfwGetWindowSize(window, &winWidth, &winHeight);
@@ -80,11 +96,84 @@ namespace ImGui
 		winModes[DownRight] = options;
 		winModes[Left] = elements;
 		winModes[Right] = properties;
+		selectedModeMiddle = viewport;
+		selectedModeUp = menu;
+		selectedModeDownLeft = add;
+		selectedModeDownRight = options;
+		selectedModeLeft = elements;
+		selectedModeRight = properties;
 	}
 	void update(GLFWwindow* window)
 	{
 		glfwGetWindowSize(window, &winWidth, &winHeight);
 	}
+	void combo(Pos mode, int& selectedMode)
+	{
+		if (ImGui::Combo(" ", &selectedMode, modes, IM_ARRAYSIZE(modes)))
+		{
+			switch (selectedMode)
+			{
+			case viewport:
+				winModes[mode] = viewport;
+				break;
+			case settings:
+				winModes[mode] = settings;
+				break;
+			case add:
+				winModes[mode] = add;
+				break;
+			case menu:
+				winModes[mode] = menu;
+				break;
+			case options:
+				winModes[mode] = options;
+				break;
+			case properties:
+				winModes[mode] = properties;
+				break;
+			case history:
+				winModes[mode] = history;
+				break;
+			case elements:
+				winModes[mode] = elements;
+				break;
+			}
+		}
+	}
+
+	void ImViewport()
+	{
+		return;
+	}
+	void ImSettings()
+	{
+		return;
+	}
+	void ImAdd()
+	{
+		return;
+	}
+	void ImMenu()
+	{
+		return;
+	}
+	void ImProperties()
+	{
+		return;
+	}
+	void ImHistory()
+	{
+		return;
+	}
+	void ImElements()
+	{
+		return;
+	}
+	void ImOptions()
+	{
+		return;
+	}
+
 	void middle()
 	{
 		if(winModes[Middle] == viewport)
@@ -94,6 +183,36 @@ namespace ImGui
 		ImGui::SetNextWindowPos(ImVec2(leftWidth, upHeight), ImGuiCond_Always);
 		ImGui::SetNextWindowSize(ImVec2(winWidth - leftWidth - rightWidth, winHeight - upHeight - downHeight), ImGuiCond_Always);
 		ImGui::Begin("Middle", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+		combo(Middle, selectedModeMiddle);
+		switch (winModes[Middle])
+		{
+		case viewport:
+			ImViewport();
+			break;
+		case settings:
+			ImSettings();
+			break;
+		case add:
+			ImAdd();
+			break;
+		case menu:
+			ImMenu();
+			break;
+		case properties:
+			ImProperties();
+			break;
+		case history:
+			ImHistory();
+			break;
+		case elements:
+			ImElements();
+			break;
+		case options:
+			ImOptions();
+			break;
+		}
+
 		ImGui::End();
 	}
 	void left()
@@ -108,6 +227,36 @@ namespace ImGui
 		ImGui::Begin("left", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
 		downHeight = winHeight - upHeight - ImGui::GetWindowSize().y;
 		leftWidth = ImGui::GetWindowSize().x;
+
+		combo(Left, selectedModeLeft);
+		switch (winModes[Left])
+		{
+		case viewport:
+			ImViewport();
+			break;
+		case settings:
+			ImSettings();
+			break;
+		case add:
+			ImAdd();
+			break;
+		case menu:
+			ImMenu();
+			break;
+		case properties:
+			ImProperties();
+			break;
+		case history:
+			ImHistory();
+			break;
+		case elements:
+			ImElements();
+			break;
+		case options:
+			ImOptions();
+			break;
+		}
+
 		ImGui::End();
 	}
 	void right()
@@ -121,6 +270,36 @@ namespace ImGui
 		ImGui::SetNextWindowSizeConstraints(ImVec2(0, winHeight - upHeight - downHeight), ImVec2(winWidth / 2.5, winHeight - upHeight - downHeight));
 		ImGui::Begin("right", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
 		rightWidth = ImGui::GetWindowSize().x;
+
+		combo(Right, selectedModeRight);
+		switch (winModes[Right])
+		{
+		case viewport:
+			ImViewport();
+			break;
+		case settings:
+			ImSettings();
+			break;
+		case add:
+			ImAdd();
+			break;
+		case menu:
+			ImMenu();
+			break;
+		case properties:
+			ImProperties();
+			break;
+		case history:
+			ImHistory();
+			break;
+		case elements:
+			ImElements();
+			break;
+		case options:
+			ImOptions();
+			break;
+		}
+
 		ImGui::End();
 	}
 	void up()
@@ -134,6 +313,36 @@ namespace ImGui
 		ImGui::SetNextWindowSize(ImVec2(winWidth + 10, upHeight), ImGuiCond_Always);
 		ImGui::Begin("Up", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
 		upHeight = ImGui::GetWindowSize().y;
+
+		combo(Up, selectedModeUp);
+		switch (winModes[Up])
+		{
+		case viewport:
+			ImViewport();
+			break;
+		case settings:
+			ImSettings();
+			break;
+		case add:
+			ImAdd();
+			break;
+		case menu:
+			ImMenu();
+			break;
+		case properties:
+			ImProperties();
+			break;
+		case history:
+			ImHistory();
+			break;
+		case elements:
+			ImElements();
+			break;
+		case options:
+			ImOptions();
+			break;
+		}
+
 		ImGui::End();
 	}
 	void down()
@@ -147,6 +356,36 @@ namespace ImGui
 		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(winWidth, winHeight / 2.5));
 		ImGui::Begin("downLeft", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
 		downHeight = ImGui::GetWindowSize().y;
+
+		combo(DownLeft, selectedModeDownLeft);
+		switch (winModes[DownLeft])
+		{
+		case viewport:
+			ImViewport();
+			break;
+		case settings:
+			ImSettings();
+			break;
+		case add:
+			ImAdd();
+			break;
+		case menu:
+			ImMenu();
+			break;
+		case properties:
+			ImProperties();
+			break;
+		case history:
+			ImHistory();
+			break;
+		case elements:
+			ImElements();
+			break;
+		case options:
+			ImOptions();
+			break;
+		}
+
 		ImGui::End();
 		if (winModes[DownRight] == viewport)
 		{
@@ -158,6 +397,36 @@ namespace ImGui
 		ImGui::Begin("downRight", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
 		downHeight = ImGui::GetWindowSize().y;
 		downleftWidth = winWidth - (ImGui::GetWindowSize().x - 10);
+
+		combo(DownRight, selectedModeDownRight);
+		switch (winModes[DownRight])
+		{
+		case viewport:
+			ImViewport();
+			break;
+		case settings:
+			ImSettings();
+			break;
+		case add:
+			ImAdd();
+			break;
+		case menu:
+			ImMenu();
+			break;
+		case properties:
+			ImProperties();
+			break;
+		case history:
+			ImHistory();
+			break;
+		case elements:
+			ImElements();
+			break;
+		case options:
+			ImOptions();
+			break;
+		}
+
 		ImGui::End();
 	}
 }
