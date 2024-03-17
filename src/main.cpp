@@ -36,6 +36,132 @@ int main()
 	return mainLoop();
 }
 
+namespace ImGui
+{
+	enum Pos
+	{
+		Middle,
+		Left,
+		Right,
+		Up,
+		DownLeft,
+		DownRight
+	};
+	enum Modes
+	{
+		viewport,
+		settings,
+		add,
+		menu,
+		properties,
+		history,
+		elements,
+		options
+	};
+	int upHeight;
+	int downHeight;
+	int leftWidth;
+	int rightWidth;
+	int winHeight;
+	int winWidth;
+	int downleftWidth;
+	Modes winModes[6];
+	void init(GLFWwindow* window)
+	{
+		glfwGetWindowSize(window, &winWidth, &winHeight);
+		upHeight = 200;
+		downHeight = 200;
+		leftWidth = 200;
+		rightWidth = 200;
+		downleftWidth = 200;
+		winModes[Middle] = viewport;
+		winModes[Up] = menu;
+		winModes[DownLeft] = add;
+		winModes[DownRight] = options;
+		winModes[Left] = elements;
+		winModes[Right] = properties;
+	}
+	void update(GLFWwindow* window)
+	{
+		glfwGetWindowSize(window, &winWidth, &winHeight);
+	}
+	void middle()
+	{
+		if(winModes[Middle] == viewport)
+		{
+			ImGui::SetNextWindowBgAlpha(0.0f);
+		}
+		ImGui::SetNextWindowPos(ImVec2(leftWidth, upHeight), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(winWidth - leftWidth - rightWidth, winHeight - upHeight - downHeight), ImGuiCond_Always);
+		ImGui::Begin("Middle", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+		ImGui::End();
+	}
+	void left()
+	{
+		if (winModes[Left] == viewport)
+		{
+			ImGui::SetNextWindowBgAlpha(0.0f);
+		}
+		ImGui::SetNextWindowPos(ImVec2(0, upHeight), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(leftWidth, winHeight - upHeight - downHeight), ImGuiCond_Always);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0, winHeight - upHeight - winHeight/2.5), ImVec2(winWidth / 2.5, winHeight - upHeight - 10));
+		ImGui::Begin("left", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+		downHeight = winHeight - upHeight - ImGui::GetWindowSize().y;
+		leftWidth = ImGui::GetWindowSize().x;
+		ImGui::End();
+	}
+	void right()
+	{
+		if (winModes[Right] == viewport)
+		{
+			ImGui::SetNextWindowBgAlpha(0.0f);
+		}
+		ImGui::SetNextWindowPos(ImVec2(winWidth - rightWidth, upHeight), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(rightWidth, winHeight - upHeight - downHeight), ImGuiCond_Always);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0, winHeight - upHeight - downHeight), ImVec2(winWidth / 2.5, winHeight - upHeight - downHeight));
+		ImGui::Begin("right", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+		rightWidth = ImGui::GetWindowSize().x;
+		ImGui::End();
+	}
+	void up()
+	{
+		if (winModes[Up] == viewport)
+		{ 
+			ImGui::SetNextWindowBgAlpha(0.0f); 
+		}
+		ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(winWidth + 10, 0), ImVec2(winWidth + 10, winHeight / 2.5));
+		ImGui::SetNextWindowSize(ImVec2(winWidth + 10, upHeight), ImGuiCond_Always);
+		ImGui::Begin("Up", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+		upHeight = ImGui::GetWindowSize().y;
+		ImGui::End();
+	}
+	void down()
+	{
+		if (winModes[DownLeft] == viewport)
+		{
+			ImGui::SetNextWindowBgAlpha(0.0f);
+		}
+		ImGui::SetNextWindowPos(ImVec2(0, winHeight - downHeight), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(downleftWidth, downHeight), ImGuiCond_Always);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(winWidth, winHeight / 2.5));
+		ImGui::Begin("downLeft", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+		downHeight = ImGui::GetWindowSize().y;
+		ImGui::End();
+		if (winModes[DownRight] == viewport)
+		{
+			ImGui::SetNextWindowBgAlpha(0.0f);
+		}
+		ImGui::SetNextWindowPos(ImVec2(downleftWidth, winHeight - downHeight), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(winWidth + 10 - downleftWidth, downHeight), ImGuiCond_Always);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(winWidth, winHeight / 2.5));
+		ImGui::Begin("downRight", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
+		downHeight = ImGui::GetWindowSize().y;
+		downleftWidth = winWidth - (ImGui::GetWindowSize().x - 10);
+		ImGui::End();
+	}
+}
+
 int mainLoop()
 {
 	bodies Bodies(0, 0);
@@ -110,18 +236,24 @@ int mainLoop()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 460");
 	ImGui::StyleColorsDark();
-	
+	ImGui::init(window);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
-		glClearColor(0.0f, 0.4f, 0.0f, 1.0f);
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame(); 
 
+		ImGui::update(window);
+		ImGui::middle();
+		ImGui::right();
+		ImGui::down();
+		ImGui::left();
+		ImGui::up();
 
-		
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);
