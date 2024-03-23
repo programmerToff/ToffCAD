@@ -114,11 +114,15 @@ public:
 	std::pair<std::vector<Body>, std::vector<std::string>> BodyList;
 	float* vertices;
 	GLuint* indices;
+	GLuint vertSize;
+	GLuint indsSize;
 
 	inline bodies(float i, GLuint g)
 	{
 		vertices = &i;
 		indices = &g;
+		vertSize = 0;
+		indsSize = 0;
 	}
 
 	inline void addCube()
@@ -140,6 +144,11 @@ public:
 	{
 		BodyList.first.push_back(genSSM());
 		BodyList.second.push_back("Vacuum Monster");
+	}
+	inline void addTriangle()
+	{
+		BodyList.first.push_back(genTriangle());
+		BodyList.second.push_back("Triangle");
 	}
 
 	inline void saveTCAD()
@@ -317,6 +326,38 @@ public:
 		file.close();
 	}
 
+	inline void printFinalInfo()
+	{
+		std::cout << "Vertices: \n";
+		float* verts = vertices;
+		for (int i = 0; i < vertSize; i += 6)
+		{
+			std::cout << *verts << ", ";
+			verts++;
+			std::cout << *verts << ", ";
+			verts++;
+			std::cout << *verts << ", ";
+			verts++;
+			std::cout << *verts << ", ";
+			verts++;
+			std::cout << *verts << ", ";
+			verts++;
+			std::cout << *verts << "\n";
+			verts++;
+		}
+
+		std::cout << "Indices: \n";
+		GLuint* inds = indices;
+		for (int i = 0; i < indsSize; i+=3)
+		{
+			std::cout << *inds << ", ";
+			inds++;
+			std::cout << *inds << ", ";
+			inds++;
+			std::cout << *inds << "\n";
+			inds++;
+		}
+	}
 	inline void printInfo()
 	{
 		int i = 0;
@@ -466,18 +507,19 @@ public:
 	inline void update()
 	{
 		if (BodyList.first.size() == 0) { return; }
-		if (BodyList.first.size() == 1) { vertices = &BodyList.first[0].verts[0]; indices = &BodyList.first[0].inds[0]; return; }
 
-		size_t vertSize = 0;
-		size_t indSize = 0;
+		size_t vertS = 0;
+		size_t indS = 0;
 		for (int i = 0; i < BodyList.first.size(); i++)
 		{
-			vertSize += BodyList.first[i].verts.size();
-			indSize += BodyList.first[i].inds.size();
+			vertS += BodyList.first[i].verts.size();
+			indS += BodyList.first[i].inds.size();
 		}
 
-		vertices = new float[vertSize];
-		indices = new GLuint[indSize];
+		vertices = new float[vertS];
+		indices = new GLuint[indS];
+		vertSize = vertS;
+		indsSize = indS;
 
 		size_t offset = 0;
 		for (const auto& Body : BodyList.first) {

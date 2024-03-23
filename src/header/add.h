@@ -18811,3 +18811,12 @@ inline Body genSSM()
 	addTriangle(body.inds, 5994, 6012, 6014);
 	return body;
 }
+inline Body genTriangle()
+{
+	Body Triangle;
+	addVertex(Triangle.verts, -1.0f, 0.0f, 0.0f);
+	addVertex(Triangle.verts, 1.0f, 0.0f, 0.0f);
+	addVertex(Triangle.verts, 0.0f, 1.0f, 0.0f);
+	addTriangle(Triangle.inds, 0, 1, 2);
+	return Triangle;
+}

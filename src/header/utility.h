@@ -18,3 +18,28 @@ inline void stlToAddBody()
 	}
 	output << "return body;";
 }
+
+inline void createDefaultTCC()
+{
+	std::ofstream file("default.tcc", std::ios::binary);
+	bool loadingScreen = false;
+	float bgColor[3] = { 0.08,0.51,0.83 };
+
+	char buffer;
+	if (loadingScreen) {
+		buffer = 255;
+	}
+	else
+	{
+		buffer = 0;
+	}
+	file.write(reinterpret_cast<char*>(&buffer), 1);
+	file.write(reinterpret_cast<char*>(&bgColor), 12);
+
+
+
+
+
+
+	file.close();
+}
