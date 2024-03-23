@@ -1,8 +1,9 @@
 #include "body.h"
 #include "utility.h"
+#include "UI.h"
 
 
-int mainLoop();
+int mainLoop(bodies b);
 void errorCallback(int error, const char* description) {
 	fprintf(stderr, "Error %d: %s\n", error, description);
 }
@@ -33,415 +34,27 @@ void processInput(GLFWwindow* window)
 
 int main()
 {
-	return mainLoop();
+	bodies b(0, 0);
+	b.addTriangle();
+	b.update();
+	std::ifstream paths("paths.txt");
+	std::string line; std::getline(paths, line);
+	Settings::Settings settings(line.c_str());
+	paths.close();
+	return mainLoop(b);
 }
 
-namespace ImGui
+int mainLoop(bodies b)
 {
-	enum Pos
-	{
-		Middle,
-		Left,
-		Right,
-		Up,
-		DownLeft,
-		DownRight
-	};
-	enum Modes
-	{
-		viewport,
-		settings,
-		add,
-		menu,
-		properties,
-		history,
-		elements,
-		options
-	};
-	int upHeight;
-	int downHeight;
-	int leftWidth;
-	int rightWidth;
-	int winHeight;
-	int winWidth;
-	int downleftWidth;
-	Modes winModes[6];
-	const char* modes[] = {
-		"viewport",
-		"settings",
-		"add",
-		"menu",
-		"properties",
-		"history",
-		"elements",
-		"options"
-	};
-	int selectedModeUp;
-	int selectedModeMiddle;
-	int selectedModeDownRight;
-	int selectedModeLeft;
-	int selectedModeRight;
-	int selectedModeDownLeft;
-	void init(GLFWwindow* window)
-	{
-		glfwGetWindowSize(window, &winWidth, &winHeight);
-		upHeight = 200;
-		downHeight = 200;
-		leftWidth = 200;
-		rightWidth = 200;
-		downleftWidth = 200;
-		winModes[Middle] = viewport;
-		winModes[Up] = menu;
-		winModes[DownLeft] = add;
-		winModes[DownRight] = options;
-		winModes[Left] = elements;
-		winModes[Right] = properties;
-		selectedModeMiddle = viewport;
-		selectedModeUp = menu;
-		selectedModeDownLeft = add;
-		selectedModeDownRight = options;
-		selectedModeLeft = elements;
-		selectedModeRight = properties;
-	}
-	void update(GLFWwindow* window)
-	{
-		glfwGetWindowSize(window, &winWidth, &winHeight);
-	}
-	void combo(Pos mode, int& selectedMode)
-	{
-		if (ImGui::Combo(" ", &selectedMode, modes, IM_ARRAYSIZE(modes)))
-		{
-			switch (selectedMode)
-			{
-			case viewport:
-				winModes[mode] = viewport;
-				break;
-			case settings:
-				winModes[mode] = settings;
-				break;
-			case add:
-				winModes[mode] = add;
-				break;
-			case menu:
-				winModes[mode] = menu;
-				break;
-			case options:
-				winModes[mode] = options;
-				break;
-			case properties:
-				winModes[mode] = properties;
-				break;
-			case history:
-				winModes[mode] = history;
-				break;
-			case elements:
-				winModes[mode] = elements;
-				break;
-			}
-		}
-	}
-
-	void ImViewport()
-	{
-		return;
-	}
-	void ImSettings()
-	{
-		return;
-	}
-	void ImAdd()
-	{
-		return;
-	}
-	void ImMenu()
-	{
-		return;
-	}
-	void ImProperties()
-	{
-		return;
-	}
-	void ImHistory()
-	{
-		return;
-	}
-	void ImElements()
-	{
-		return;
-	}
-	void ImOptions()
-	{
-		return;
-	}
-
-	void middle()
-	{
-		if(winModes[Middle] == viewport)
-		{
-			ImGui::SetNextWindowBgAlpha(0.0f);
-		}
-		ImGui::SetNextWindowPos(ImVec2(leftWidth, upHeight), ImGuiCond_Always);
-		ImGui::SetNextWindowSize(ImVec2(winWidth - leftWidth - rightWidth, winHeight - upHeight - downHeight), ImGuiCond_Always);
-		ImGui::Begin("Middle", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-		combo(Middle, selectedModeMiddle);
-		switch (winModes[Middle])
-		{
-		case viewport:
-			ImViewport();
-			break;
-		case settings:
-			ImSettings();
-			break;
-		case add:
-			ImAdd();
-			break;
-		case menu:
-			ImMenu();
-			break;
-		case properties:
-			ImProperties();
-			break;
-		case history:
-			ImHistory();
-			break;
-		case elements:
-			ImElements();
-			break;
-		case options:
-			ImOptions();
-			break;
-		}
-
-		ImGui::End();
-	}
-	void left()
-	{
-		if (winModes[Left] == viewport)
-		{
-			ImGui::SetNextWindowBgAlpha(0.0f);
-		}
-		ImGui::SetNextWindowPos(ImVec2(0, upHeight), ImGuiCond_Always);
-		ImGui::SetNextWindowSize(ImVec2(leftWidth, winHeight - upHeight - downHeight), ImGuiCond_Always);
-		ImGui::SetNextWindowSizeConstraints(ImVec2(0, winHeight - upHeight - winHeight/2.5), ImVec2(winWidth / 2.5, winHeight - upHeight - 10));
-		ImGui::Begin("left", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-		downHeight = winHeight - upHeight - ImGui::GetWindowSize().y;
-		leftWidth = ImGui::GetWindowSize().x;
-
-		combo(Left, selectedModeLeft);
-		switch (winModes[Left])
-		{
-		case viewport:
-			ImViewport();
-			break;
-		case settings:
-			ImSettings();
-			break;
-		case add:
-			ImAdd();
-			break;
-		case menu:
-			ImMenu();
-			break;
-		case properties:
-			ImProperties();
-			break;
-		case history:
-			ImHistory();
-			break;
-		case elements:
-			ImElements();
-			break;
-		case options:
-			ImOptions();
-			break;
-		}
-
-		ImGui::End();
-	}
-	void right()
-	{
-		if (winModes[Right] == viewport)
-		{
-			ImGui::SetNextWindowBgAlpha(0.0f);
-		}
-		ImGui::SetNextWindowPos(ImVec2(winWidth - rightWidth, upHeight), ImGuiCond_Always);
-		ImGui::SetNextWindowSize(ImVec2(rightWidth, winHeight - upHeight - downHeight), ImGuiCond_Always);
-		ImGui::SetNextWindowSizeConstraints(ImVec2(0, winHeight - upHeight - downHeight), ImVec2(winWidth / 2.5, winHeight - upHeight - downHeight));
-		ImGui::Begin("right", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-		rightWidth = ImGui::GetWindowSize().x;
-
-		combo(Right, selectedModeRight);
-		switch (winModes[Right])
-		{
-		case viewport:
-			ImViewport();
-			break;
-		case settings:
-			ImSettings();
-			break;
-		case add:
-			ImAdd();
-			break;
-		case menu:
-			ImMenu();
-			break;
-		case properties:
-			ImProperties();
-			break;
-		case history:
-			ImHistory();
-			break;
-		case elements:
-			ImElements();
-			break;
-		case options:
-			ImOptions();
-			break;
-		}
-
-		ImGui::End();
-	}
-	void up()
-	{
-		if (winModes[Up] == viewport)
-		{ 
-			ImGui::SetNextWindowBgAlpha(0.0f); 
-		}
-		ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
-		ImGui::SetNextWindowSizeConstraints(ImVec2(winWidth + 10, 0), ImVec2(winWidth + 10, winHeight / 2.5));
-		ImGui::SetNextWindowSize(ImVec2(winWidth + 10, upHeight), ImGuiCond_Always);
-		ImGui::Begin("Up", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-		upHeight = ImGui::GetWindowSize().y;
-
-		combo(Up, selectedModeUp);
-		switch (winModes[Up])
-		{
-		case viewport:
-			ImViewport();
-			break;
-		case settings:
-			ImSettings();
-			break;
-		case add:
-			ImAdd();
-			break;
-		case menu:
-			ImMenu();
-			break;
-		case properties:
-			ImProperties();
-			break;
-		case history:
-			ImHistory();
-			break;
-		case elements:
-			ImElements();
-			break;
-		case options:
-			ImOptions();
-			break;
-		}
-
-		ImGui::End();
-	}
-	void down()
-	{
-		if (winModes[DownLeft] == viewport)
-		{
-			ImGui::SetNextWindowBgAlpha(0.0f);
-		}
-		ImGui::SetNextWindowPos(ImVec2(0, winHeight - downHeight), ImGuiCond_Always);
-		ImGui::SetNextWindowSize(ImVec2(downleftWidth, downHeight), ImGuiCond_Always);
-		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(winWidth, winHeight / 2.5));
-		ImGui::Begin("downLeft", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-		downHeight = ImGui::GetWindowSize().y;
-
-		combo(DownLeft, selectedModeDownLeft);
-		switch (winModes[DownLeft])
-		{
-		case viewport:
-			ImViewport();
-			break;
-		case settings:
-			ImSettings();
-			break;
-		case add:
-			ImAdd();
-			break;
-		case menu:
-			ImMenu();
-			break;
-		case properties:
-			ImProperties();
-			break;
-		case history:
-			ImHistory();
-			break;
-		case elements:
-			ImElements();
-			break;
-		case options:
-			ImOptions();
-			break;
-		}
-
-		ImGui::End();
-		if (winModes[DownRight] == viewport)
-		{
-			ImGui::SetNextWindowBgAlpha(0.0f);
-		}
-		ImGui::SetNextWindowPos(ImVec2(downleftWidth, winHeight - downHeight), ImGuiCond_Always);
-		ImGui::SetNextWindowSize(ImVec2(winWidth + 10 - downleftWidth, downHeight), ImGuiCond_Always);
-		ImGui::SetNextWindowSizeConstraints(ImVec2(0, 0), ImVec2(winWidth, winHeight / 2.5));
-		ImGui::Begin("downRight", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove);
-		downHeight = ImGui::GetWindowSize().y;
-		downleftWidth = winWidth - (ImGui::GetWindowSize().x - 10);
-
-		combo(DownRight, selectedModeDownRight);
-		switch (winModes[DownRight])
-		{
-		case viewport:
-			ImViewport();
-			break;
-		case settings:
-			ImSettings();
-			break;
-		case add:
-			ImAdd();
-			break;
-		case menu:
-			ImMenu();
-			break;
-		case properties:
-			ImProperties();
-			break;
-		case history:
-			ImHistory();
-			break;
-		case elements:
-			ImElements();
-			break;
-		case options:
-			ImOptions();
-			break;
-		}
-
-		ImGui::End();
-	}
-}
-
-int mainLoop()
-{
-	bodies Bodies(0, 0);
+	bodies Bodies = b;
 	
 	if (!glfwInit())
 	{
 		std::cout << "glfw init failed";
 	}
 	glfwSetErrorCallback(errorCallback);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	GLFWwindow* window = glfwCreateWindow(1000, 1000, "ToffCAD", NULL, NULL);
 	if (!window)
@@ -503,14 +116,16 @@ int mainLoop()
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 460");
-	ImGui::StyleColorsDark();
-	ImGui::init(window);
+	ImGui_ImplOpenGL3_Init("#version 330");
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.Colors[ImGuiCol_PopupBg] = ImVec4(0.0f, 0.4f, 0.0f, 1.0f);
+	style.Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.4f, 0.0f, 1.0f);
+	ImGui::init(window, VAO);
 
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClearColor(0.22f, 0.65f, 0.67f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -524,6 +139,11 @@ int mainLoop()
 		ImGui::up();
 
 		ImGui::Render();
+
+		glUseProgram(shaderProgram);
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, b.indsSize, GL_UNSIGNED_INT, 0);
+
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		glfwSwapBuffers(window);
 		glfwPollEvents();
