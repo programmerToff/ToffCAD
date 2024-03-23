@@ -1,0 +1,3 @@
+1 bit loadong screen;
+7 other bits;
+12 bytes bgCol;
