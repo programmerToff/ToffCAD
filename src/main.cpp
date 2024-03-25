@@ -1,15 +1,12 @@
 #include "body.h"
 #include "utility.h"
 #include "UI.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
 
-
-int mainLoop(bodies b);
+int mainLoop(bodies b, Settings::Settings Settings);
 void errorCallback(int error, const char* description) {
 	fprintf(stderr, "Error %d: %s\n", error, description);
-}
-void framebuffer_size_callback(GLFWwindow* window, int x, int y)
-{
-	glViewport(0, 0, x, y);
 }
 std::string get_file_contents(const char* filename)
 {
@@ -31,20 +28,73 @@ void processInput(GLFWwindow* window)
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 }
+bool loadIcon(GLFWwindow* window) {
+	int width, height, channels;
+	unsigned char* pixels = stbi_load("mainIcon.png", &width, &height, &channels, 4);
 
-int main()
-{
-	bodies b(0, 0);
-	b.addTriangle();
-	b.update();
-	std::ifstream paths("paths.txt");
-	std::string line; std::getline(paths, line);
-	Settings::Settings settings(line.c_str());
-	paths.close();
-	return mainLoop(b);
+	if (!pixels) {
+		return false;
+	}
+
+	GLFWimage image;
+	image.width = width;
+	image.height = height;
+	image.pixels = pixels;
+
+	glfwSetWindowIcon(window, 1, &image);
+
+	stbi_image_free(pixels);
+	return true;
 }
 
-int mainLoop(bodies b)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+	bodies b(0, 0);
+	AllocConsole();
+	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	std::string filePath(lpCmdLine);
+	if (filePath.length() > 5)
+	{
+		std::string extension = filePath.substr(filePath.length() - 5, 4);
+		if (extension == ".tcc")
+		{
+			std::ifstream inputFile("paths.txt");
+			std::string line;
+			std::getline(inputFile, line);
+			std::ofstream outputFile("paths.txt");
+			outputFile << filePath.substr(1, filePath.length()-2) << "\n";
+			while (std::getline(inputFile, line))
+			{
+				outputFile << line << "\n";
+			}
+			inputFile.close();
+			outputFile.close();
+		}
+		else if (extension == "tcad")
+		{
+			b.openTCAD(filePath.substr(1, filePath.length() - 2));
+		}
+		else if (extension == ".stl")
+		{
+			b.readSTL(filePath.substr(1, filePath.length() - 2));
+			b.optimizeVertexCount(0);
+		}
+	}
+
+	createDefaultTCC();
+	std::ifstream paths("paths.txt");
+	std::string line;
+	std::getline(paths, line);
+	char* charPtr = new char[line.length() + 1];
+	std::copy(line.begin(), line.end(), charPtr);
+	charPtr[line.length()] = '\0';
+	Settings::Settings Settings(charPtr);
+	paths.close();
+
+	return mainLoop(b, Settings);
+}
+
+int mainLoop(bodies b, Settings::Settings Settings)
 {
 	bodies Bodies = b;
 	
@@ -61,6 +111,7 @@ int mainLoop(bodies b)
 	{
 		std::cout << "Window creation failed";
 	}
+	loadIcon(window);
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	gladLoadGL();
@@ -118,25 +169,22 @@ int mainLoop(bodies b)
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 	ImGuiStyle& style = ImGui::GetStyle();
-	style.Colors[ImGuiCol_PopupBg] = ImVec4(0.0f, 0.4f, 0.0f, 1.0f);
-	style.Colors[ImGuiCol_FrameBg] = ImVec4(0.0f, 0.4f, 0.0f, 1.0f);
-	ImGui::init(window, VAO);
-
+	UI::init(window, VAO, &Settings);
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
-		glClearColor(0.22f, 0.65f, 0.67f, 1.0f);
+		glClearColor(Settings.bgCol.x, Settings.bgCol.y, Settings.bgCol.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame(); 
 
-		ImGui::update(window);
-		ImGui::middle();
-		ImGui::right();
-		ImGui::down();
-		ImGui::left();
-		ImGui::up();
+		UI::update(window);
+		UI::middle();
+		UI::right();
+		UI::down();
+		UI::left();
+		UI::up();
 
 		ImGui::Render();
 
@@ -148,20 +196,6 @@ int mainLoop(bodies b)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
-
-
-
-
-
-
-
-
-
-	
-
-
-
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
