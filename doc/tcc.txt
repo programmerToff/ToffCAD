@@ -1,3 +1,10 @@
 1 bit loadong screen;
 7 other bits;
 12 bytes bgCol;
+1 byte for each winMode:
+	Middle
+	Up
+	DownRight
+	DownLeft
+	Right
+	Left
