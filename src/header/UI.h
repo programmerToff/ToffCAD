@@ -113,12 +113,7 @@ namespace Settings
 				outputFile.close();
 			}
 			bool bits[8];
-			char buffer;
-			tccFile.read(reinterpret_cast<char*>(&buffer), 1);
-			for (int i = 0; i < 8; ++i) {
-				bits[i] = (buffer >> (7 - i)) & 1;
-			}
-
+			tccFile.read(reinterpret_cast<char*>(&bits), 1);
 			loadingScreen = bits[0];
 
 			if (loadingScreen)
@@ -219,6 +214,12 @@ namespace Settings
 	}
 }
 
+namespace Menu
+{
+	std::string filepath;
+	char* message;
+}
+
 namespace UI
 {
 	int upHeight;
@@ -248,7 +249,8 @@ namespace UI
 	int defaultModesCur[posCount];
 	GLuint VAO;
 	Settings::Settings* Settings;
-	void init(GLFWwindow* window, GLuint vao, Settings::Settings* initSettings)
+	bodies* b;
+	void init(GLFWwindow* window, GLuint vao, Settings::Settings* initSettings, bodies* bp)
 	{
 		Settings = initSettings;
 		glfwGetWindowSize(window, &winWidth, &winHeight);
@@ -275,7 +277,9 @@ namespace UI
 		defaultModesCur[DownLeft] = winModes[DownLeft];
 		defaultModesCur[Right] = winModes[Right];
 		defaultModesCur[Left] = winModes[Left];
+		Menu::message = (char*)"";
 		VAO = vao;
+		b = bp;
 	}
 	void update(GLFWwindow* window)
 	{
@@ -600,7 +604,45 @@ namespace UI
 	}
 	void ImMenu()
 	{
-		return;
+		if (ImGui::Button("new TCAD", ImVec2(95, 20)))
+		{
+			b->BodyList.first.clear();
+			b->BodyList.second.clear();
+			Menu::filepath = "";
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("save TCAD", ImVec2(95, 20)))
+			if (Menu::filepath != "")
+				b->saveTCAD(Menu::filepath);
+			else
+				Menu::message = (char*)"no filepath given";
+
+		ImGui::SameLine();
+		if (ImGui::Button("open STL", ImVec2(95, 20)))
+			b->readSTL(openExplorerDialog());
+
+		if (ImGui::Button("open TCAD", ImVec2(95, 20)))
+			b->openTCAD(openExplorerDialog());
+		ImGui::SameLine();
+		if (ImGui::Button("save TCAD as", ImVec2(95, 20)))
+		{
+			Menu::filepath = saveFileDialog();
+			b->saveTCAD(Menu::filepath);
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("save STL", ImVec2(95, 20)))
+			b->generateSTL(0, saveFileDialog());
+
+		for(int i = 0;i<5;i++)
+			ImGui::Spacing();
+		
+		ImGui::Text(Menu::message);
+		ImGui::SameLine();
+		if(Menu::message != "")
+			if (ImGui::Button("OK"))
+				Menu::message = (char*)"";
 	}
 	void ImProperties()
 	{
