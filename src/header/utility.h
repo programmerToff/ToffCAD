@@ -4,7 +4,7 @@
 inline void stlToAddBody()
 {
 	bodies bodySTL(0, 0);
-	bodySTL.readSTL();
+	bodySTL.readSTL(openExplorerDialog());
 	bodySTL.optimizeVertexCount(0);
 	std::ofstream output(saveFileDialog());
 	output << "Body body(0);\n";

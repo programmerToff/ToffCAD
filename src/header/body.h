@@ -139,9 +139,9 @@ public:
 		BodyList.second.push_back("Triangle");
 	}
 
-	inline void saveTCAD()
+	inline void saveTCAD(std::string filepath)
 	{
-		std::ofstream file(saveFileDialog().c_str(), std::ios::binary);
+		std::ofstream file(filepath, std::ios::binary);
 
 		int i = 0;
 		uint16_t bodyCount = BodyList.first.size();
@@ -171,12 +171,11 @@ public:
 
 		file.close();
 	}
-	inline void openTCAD()
+	inline void openTCAD(std::string filepath)
 	{
 		BodyList.first.clear();
 		BodyList.second.clear();
 
-		std::string filepath = openExplorerDialog();
 		Body nullBody;
 		float vertex;
 		GLuint indice;
@@ -221,13 +220,13 @@ public:
 
 		file.close();
 	}
-	inline void generateSTL(int bodyIndex)
+	inline void generateSTL(int bodyIndex, std::string filepath)
 	{
 		const char* header = "ToffCAD generated this STL-script. https://github.com/programmerToff/ToffCAD   ";
 		uint16_t attribByteCount = 0;
 		uint32_t triangleCount = BodyList.first[bodyIndex].inds.size() / 3;
 
-		std::ofstream file(saveFileDialog(), std::ios::binary);
+		std::ofstream file(filepath, std::ios::binary);
 
 		file.write(header, 80);
 		file.write(reinterpret_cast<char*>(&triangleCount), 4);
@@ -261,9 +260,8 @@ public:
 		}
 		file.close();
 	}
-	inline void readSTL()
+	inline void readSTL(std::string filepath)
 	{
-		std::string filepath = openExplorerDialog();
 		std::ifstream file(filepath, std::ios::binary);
 
 		Body body;
