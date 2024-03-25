@@ -30,27 +30,20 @@ struct PropertiesTriangle
 };
 
 inline std::string saveFileDialog() {
-	// Use Windows API to open Save As dialog
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	IFileSaveDialog* pFileSave;
 
-	// Create the FileSaveDialog object
 	if (SUCCEEDED(CoCreateInstance(CLSID_FileSaveDialog, NULL, CLSCTX_ALL, IID_IFileSaveDialog, reinterpret_cast<void**>(&pFileSave)))) {
-		// Show the dialog
 		if (SUCCEEDED(pFileSave->Show(NULL))) {
-			// Get the result
 			IShellItem* pItem;
 			if (SUCCEEDED(pFileSave->GetResult(&pItem))) {
 				PWSTR pszFilePath;
-				// Get the file path
 				if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath))) {
 					std::wstring wsFilePath(pszFilePath);
 					CoTaskMemFree(pszFilePath);
 					pItem->Release();
 					pFileSave->Release();
 					CoUninitialize();
-
-					// Convert wide string to narrow string
 					std::string filePath(wsFilePath.begin(), wsFilePath.end());
 					return filePath;
 				}
@@ -61,7 +54,7 @@ inline std::string saveFileDialog() {
 	}
 	CoUninitialize();
 
-	return "";  // Return an empty string if the user cancels the dialog or an error occurs
+	return "";
 }
 inline void getNormal(float normal[3], float p1[3], float p2[3], float p3[3])
 {
@@ -76,17 +69,12 @@ inline std::string openExplorerDialog() {
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 	IFileOpenDialog* pFileOpen;
 
-	// Create the FileOpenDialog object
 	if (SUCCEEDED(CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_ALL, IID_IFileOpenDialog, reinterpret_cast<void**>(&pFileOpen)))) {
-		// Show the dialog
 		if (SUCCEEDED(pFileOpen->Show(NULL))) {
-			// Get the result
 			IShellItem* pItem;
 			if (SUCCEEDED(pFileOpen->GetResult(&pItem))) {
 				PWSTR pszFilePath;
-				// Get the file path
 				if (SUCCEEDED(pItem->GetDisplayName(SIGDN_FILESYSPATH, &pszFilePath))) {
-					// Convert wide string to narrow string
 					int bufferSize = WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, nullptr, 0, nullptr, nullptr);
 					std::string filePath(bufferSize, '\0');
 					WideCharToMultiByte(CP_ACP, 0, pszFilePath, -1, &filePath[0], bufferSize, nullptr, nullptr);
