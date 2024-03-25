@@ -3,6 +3,7 @@
 #include "UI.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
+#include <Shlwapi.h>
 
 int mainLoop(bodies b, Settings::Settings Settings);
 void errorCallback(int error, const char* description) {
@@ -169,7 +170,8 @@ int mainLoop(bodies b, Settings::Settings Settings)
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 	ImGuiStyle& style = ImGui::GetStyle();
-	UI::init(window, VAO, &Settings);
+	UI::init(window, VAO, &Settings, &Bodies);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		processInput(window);
@@ -185,7 +187,6 @@ int mainLoop(bodies b, Settings::Settings Settings)
 		UI::down();
 		UI::left();
 		UI::up();
-
 		ImGui::Render();
 
 		glUseProgram(shaderProgram);
